@@ -66,6 +66,15 @@ function findUserById(id, includePassword = false) {
   );
 }
 
+// Look up a user by email (case-insensitive via stored lowercase).
+// includePassword must be true only when comparing the hash at login time.
+function findUserByEmail(email, includePassword = false) {
+  return usersCollection().findOne(
+    { email: email.toLowerCase() },
+    includePassword ? {} : { projection: HIDE_PASSWORD }
+  );
+}
+
 function findUsers(filter, skip, limit) {
   return usersCollection()
     .find(filter, { projection: HIDE_PASSWORD })
@@ -107,6 +116,7 @@ module.exports = {
   buildNameFilter,
   createUser,
   findUserById,
+  findUserByEmail,
   findUsers,
   countUsers,
   updateUserById,

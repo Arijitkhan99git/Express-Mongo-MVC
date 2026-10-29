@@ -6,6 +6,7 @@ const { connectDB } = require("./src/config/db");
 const UserModel = require("./src/models/user.model");
 const authRoutes = require("./src/routes/auth.routes");
 const userRoutes = require("./src/routes/user.routes");
+const requireAuth = require("./src/middleware/auth.middleware");
 const errorHandler = require("./src/middleware/errorHandler");
 
 const app = express();
@@ -18,10 +19,12 @@ app.get("/", (req, res) => {
 });
 
 // Every route inside auth.routes.js starts with /api/auth
+// These stay public (register, login) — requireAuth is applied only where needed inside.
 app.use("/api/auth", authRoutes);
 
 // Every route inside user.routes.js starts with /api/users
-app.use("/api/users", userRoutes);
+// requireAuth applied here covers ALL /api/users routes at once.
+app.use("/api/users", requireAuth, userRoutes);
 
 // Must be after all routes.
 app.use(errorHandler);
