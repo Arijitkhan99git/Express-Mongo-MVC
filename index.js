@@ -2,6 +2,7 @@
 require("dotenv").config(); // loads .env (must run before anything reads process.env)
 
 const express = require("express");
+const helmet = require("helmet");
 const { connectDB } = require("./src/config/db");
 const UserModel = require("./src/models/user.model");
 const authRoutes = require("./src/routes/auth.routes");
@@ -11,6 +12,10 @@ const errorHandler = require("./src/middleware/errorHandler");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+
+// Security headers (CSP, HSTS, nosniff, frame protection, ...). Must be first so every response gets them.
+// It also removes the "X-Powered-By: Express" header.
+app.use(helmet());
 
 app.use(express.json());
 
