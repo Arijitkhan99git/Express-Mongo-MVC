@@ -107,6 +107,7 @@ Server starts at `http://localhost:8000`.
 | `MONGODB_DB` | Yes | Database name |
 | `JWT_SECRET` | Yes | Long random string used to sign/verify tokens |
 | `JWT_EXPIRES_IN` | No | Token lifetime (default: `1h`) |
+| `CORS_ORIGINS` | No | Comma-separated frontend origins allowed to call the API from a browser, e.g. `https://www.testbook.com,http://localhost:3000`. Empty = none allowed |
 
 ---
 

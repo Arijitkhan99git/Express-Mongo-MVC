@@ -7,6 +7,7 @@ const { connectDB } = require("./src/config/db");
 const UserModel = require("./src/models/user.model");
 const authRoutes = require("./src/routes/auth.routes");
 const userRoutes = require("./src/routes/user.routes");
+const corsMiddleware = require("./src/middleware/cors");
 const requireAuth = require("./src/middleware/auth.middleware");
 const errorHandler = require("./src/middleware/errorHandler");
 
@@ -16,6 +17,10 @@ const PORT = process.env.PORT || 8000;
 // Security headers (CSP, HSTS, nosniff, frame protection, ...). Must be first so every response gets them.
 // It also removes the "X-Powered-By: Express" header.
 app.use(helmet());
+
+// CORS: before the routes so browser preflight (OPTIONS) requests are answered
+// before requireAuth, which would reject them (preflight carries no token).
+app.use(corsMiddleware);
 
 app.use(express.json());
 
