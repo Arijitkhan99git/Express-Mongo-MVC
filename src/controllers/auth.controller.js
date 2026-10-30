@@ -84,4 +84,33 @@ async function profile(req, res) {
   res.json({ user: req.user });
 }
 
-module.exports = { register, login, profile };
+// PATCH /api/auth/change-password  (protected — requireAuth runs before this)
+async function changePassword(req, res) {
+  try {
+    const { currentPassword, newPassword } = req.validatedBody;
+
+    // req.user has no hash, so fetch it again WITH the hash for bcrypt.compare.
+    const user = await UserModel.findUserById(req.user._id, true);
+
+    const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    if (currentPassword === newPassword) {
+      return res
+        .status(400)
+        .json({ message: "New password must be different from the current password" });
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    await UserModel.updateUserById(req.user._id, { password: hashedPassword });
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ message: "Failed to change password" });
+  }
+}
+
+module.exports = { register, login, profile, changePassword };

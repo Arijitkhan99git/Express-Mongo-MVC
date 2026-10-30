@@ -35,4 +35,29 @@ function validateLogin(req, res, next) {
   next();
 }
 
-module.exports = { validateRegister, validateLogin };
+// Change password needs the current password (non-empty) and a new one that follows the schema rules.
+function validateChangePassword(req, res, next) {
+  const { currentPassword, newPassword } = req.body ?? {};
+  const errors = [];
+
+  if (!currentPassword || typeof currentPassword !== "string") {
+    errors.push("currentPassword is required");
+  }
+
+  // Reuse the register password rules (min length, 72-byte bcrypt limit) for the new one.
+  const { data, errors: newPasswordErrors } = validateFields(
+    { newPassword: userSchema.password },
+    { newPassword },
+    { fields: ["newPassword"] }
+  );
+  errors.push(...newPasswordErrors);
+
+  if (errors.length > 0) {
+    return res.status(400).json({ message: "Validation failed", errors });
+  }
+
+  req.validatedBody = { currentPassword, newPassword: data.newPassword };
+  next();
+}
+
+module.exports = { validateRegister, validateLogin, validateChangePassword };
