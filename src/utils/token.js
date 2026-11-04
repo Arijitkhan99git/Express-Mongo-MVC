@@ -3,7 +3,8 @@
 const jwt = require("jsonwebtoken");
 
 const SECRET = process.env.JWT_SECRET;
-const EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
+// Short on purpose: the refresh token (see refreshToken.js) renews it.
+const EXPIRES_IN = process.env.JWT_EXPIRES_IN || "15m";
 
 /**
  * Sign a token that contains only the user's _id as "sub".

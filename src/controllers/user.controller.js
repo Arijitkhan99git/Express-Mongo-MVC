@@ -1,5 +1,6 @@
 // Controller: reads the request, calls the model, sends the response.
 const UserModel = require("../models/user.model");
+const RefreshTokenModel = require("../models/refreshToken.model");
 const parsePositiveInt = require("../utils/parsePositiveInt");
 
 // Pagination defaults.
@@ -182,6 +183,9 @@ async function deleteUser(req, res) {
     if (!deleted) {
       return res.status(404).json({ message: "User not found" });
     }
+
+    // The account is gone, so its login sessions go too.
+    await RefreshTokenModel.deleteAllForUser(req.params.id);
 
     res.status(200).json({
       message: "User deleted successfully",

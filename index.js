@@ -5,6 +5,7 @@ const express = require("express");
 const helmet = require("helmet");
 const { connectDB } = require("./src/config/db");
 const UserModel = require("./src/models/user.model");
+const RefreshTokenModel = require("./src/models/refreshToken.model");
 const authRoutes = require("./src/routes/auth.routes");
 const userRoutes = require("./src/routes/user.routes");
 const corsMiddleware = require("./src/middleware/cors");
@@ -45,6 +46,9 @@ async function startServer() {
 
     // Unique index so the same email can't be inserted twice.
     await UserModel.createIndexes();
+
+    // Unique token hash + TTL index that deletes expired refresh tokens.
+    await RefreshTokenModel.createIndexes();
 
     app.listen(PORT, () => {
       console.log(`Server running at http://localhost:${PORT}`);

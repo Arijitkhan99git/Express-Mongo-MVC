@@ -6,6 +6,7 @@ const {
   validateRegister,
   validateLogin,
   validateChangePassword,
+  validateRefreshToken,
 } = require("../middleware/validateAuth");
 const requireAuth = require("../middleware/auth.middleware");
 
@@ -29,13 +30,31 @@ const passwordLimiter = rateLimit({
   message: { message: "Too many password change attempts, please try again later" },
 });
 
+// Refresh is called automatically by clients, so the limit is higher than for login.
+const refreshLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many refresh attempts, please try again later" },
+});
+
 // --- Public routes ---
 router.post("/register", validateRegister, controller.register);
 router.post("/login", loginLimiter, validateLogin, controller.login);
 
+// POST /api/auth/refresh — body: { refreshToken } -> new accessToken + refreshToken
+router.post("/refresh", refreshLimiter, validateRefreshToken, controller.refresh);
+
+// POST /api/auth/logout — body: { refreshToken } -> ends that login session
+router.post("/logout", validateRefreshToken, controller.logout);
+
 // --- Protected routes ---
 // GET /api/auth/profile  — returns the currently signed-in user
 router.get("/profile", requireAuth, controller.profile);
+
+// POST /api/auth/logout-all — ends every login session of the signed-in user
+router.post("/logout-all", requireAuth, controller.logoutAll);
 
 // PATCH /api/auth/change-password — body: { currentPassword, newPassword }
 router.patch(

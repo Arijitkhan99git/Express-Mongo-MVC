@@ -60,4 +60,23 @@ function validateChangePassword(req, res, next) {
   next();
 }
 
-module.exports = { validateRegister, validateLogin, validateChangePassword };
+// Refresh and logout both take just { refreshToken } in the body.
+function validateRefreshToken(req, res, next) {
+  const { refreshToken } = req.body ?? {};
+
+  if (!refreshToken || typeof refreshToken !== "string") {
+    return res
+      .status(400)
+      .json({ message: "Validation failed", errors: ["refreshToken is required"] });
+  }
+
+  req.validatedBody = { refreshToken };
+  next();
+}
+
+module.exports = {
+  validateRegister,
+  validateLogin,
+  validateChangePassword,
+  validateRefreshToken,
+};

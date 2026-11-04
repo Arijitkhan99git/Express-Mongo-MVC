@@ -106,7 +106,8 @@ Server starts at `http://localhost:8000`.
 | `MONGODB_URI` | Yes | MongoDB connection string |
 | `MONGODB_DB` | Yes | Database name |
 | `JWT_SECRET` | Yes | Long random string used to sign/verify tokens |
-| `JWT_EXPIRES_IN` | No | Token lifetime (default: `1h`) |
+| `JWT_EXPIRES_IN` | No | Access token lifetime (default: `15m`) |
+| `REFRESH_TOKEN_EXPIRES_DAYS` | No | Refresh token lifetime in days (default: `7`) |
 | `CORS_ORIGINS` | No | Comma-separated frontend origins allowed to call the API from a browser, e.g. `https://www.testbook.com,http://localhost:3000`. Empty = none allowed |
 
 ---
@@ -341,7 +342,28 @@ PROTECTED REQUEST
 
 **What the token contains:** only `sub` (user `_id`), `iat`, and `exp`. No email, no password — JWTs are readable by anyone who holds one.
 
-**Token lifetime:** 1 hour (configurable via `JWT_EXPIRES_IN`).
+**Token lifetime:** 15 minutes (configurable via `JWT_EXPIRES_IN`). A refresh token renews it (see below).
+
+### Refresh Tokens
+
+Register, login and change-password return `accessToken` **and** `refreshToken`.
+
+| Endpoint | Auth | Body | Effect |
+|---|---|---|---|
+| `POST /api/auth/refresh` | none | `{ "refreshToken" }` | New `accessToken` + new `refreshToken`; the old one is spent |
+| `POST /api/auth/logout` | none | `{ "refreshToken" }` | Ends that login session |
+| `POST /api/auth/logout-all` | Bearer | none | Ends every session of the user |
+
+```
+login ──► accessToken (15m) + refreshToken (7d)
+API call with accessToken ──► 401 "Token has expired"
+POST /refresh with refreshToken ──► new pair (rotation), retry the call
+```
+
+- The refresh token is a random string. Only its SHA-256 hash is stored (`refresh_tokens` collection); a TTL index deletes expired rows.
+- **Rotation:** every refresh token works once. Replaying an already-used token is treated as theft and ends the whole session (`401`).
+- Changing the password or deleting the user revokes all refresh tokens.
+- `requireAuth` only checks access tokens. A logged-out access token still works until its 15 minutes run out.
 
 ---
 
