@@ -32,6 +32,11 @@ function validateFields(schema, body, { partial = false, fields = Object.keys(sc
       continue;
     }
 
+    if (rules.maxLength !== undefined && value.length > rules.maxLength) {
+      errors.push(`${field} must be at most ${rules.maxLength} characters`);
+      continue;
+    }
+
     // bcrypt only reads the first 72 BYTES, so longer passwords are rejected, not silently cut.
     if (rules.maxBytes !== undefined && Buffer.byteLength(value, "utf8") > rules.maxBytes) {
       errors.push(`${field} is too long (max ${rules.maxBytes} bytes)`);

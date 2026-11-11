@@ -6,8 +6,10 @@ const helmet = require("helmet");
 const { connectDB } = require("./src/config/db");
 const UserModel = require("./src/models/user.model");
 const RefreshTokenModel = require("./src/models/refreshToken.model");
+const PostModel = require("./src/models/posts.model");
 const authRoutes = require("./src/routes/auth.routes");
 const userRoutes = require("./src/routes/user.routes");
+const postRoutes = require("./src/routes/post.routes");
 const corsMiddleware = require("./src/middleware/cors");
 const requireAuth = require("./src/middleware/auth.middleware");
 const errorHandler = require("./src/middleware/errorHandler");
@@ -37,6 +39,11 @@ app.use("/api/auth", authRoutes);
 // requireAuth applied here covers ALL /api/users routes at once.
 app.use("/api/users", requireAuth, userRoutes);
 
+
+// Every route inside user.routes.js starts with /api/posts
+// requireAuth applied here covers ALL /api/posts routes at once.
+app.use("/api/posts", requireAuth, postRoutes)
+
 // Must be after all routes.
 app.use(errorHandler);
 
@@ -50,6 +57,10 @@ async function startServer() {
     // Unique token hash + TTL index that deletes expired refresh tokens.
     await RefreshTokenModel.createIndexes();
 
+    //Unique index so that post title will be unique
+    await PostModel.createIndexes();
+
+  
     app.listen(PORT, () => {
       console.log(`Server running at http://localhost:${PORT}`);
     });
