@@ -8,7 +8,11 @@ const router = express.Router();
 
 
 router.post("/",validatePost, controller.createPost)
-router.get("/", controller.getPosts);
+
+router.get("/", controller.getPosts); //all posts
+
+router.get("/:id",validateObjectId("post"), controller.getPostById)
+
 
 
 module.exports = router;

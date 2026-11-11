@@ -1,3 +1,4 @@
+const { ObjectId } = require("mongodb");
 const { getDB } = require("../config/db");
 
 // What a client may send when creating a post. Validation middleware reads this.
@@ -51,9 +52,9 @@ function findPosts(filter, skip, limit, ranked = false){
     return cursor.skip(skip).limit(limit).toArray();
 }
 
-// function findPostById(id){
-//     return id;
-// }
+function findPostById(id){
+    return postsCollections().findOne({_id: new ObjectId(id)})
+}
 
 
 function countPosts(filter){
@@ -67,5 +68,6 @@ module.exports = {
     buildSearchFilter,
     createPost,
     findPosts,
-    countPosts
+    countPosts,
+    findPostById
 }

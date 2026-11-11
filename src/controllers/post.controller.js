@@ -1,5 +1,6 @@
 const parsePositiveInt = require("../utils/parsePositiveInt");
 const PostModel = require('../models/posts.model');
+const UserModel = require("../models/user.model");
 
 // Pagination defaults.
 const DEFAULT_LIMIT = 10;
@@ -94,7 +95,33 @@ async function getPosts(req, res){
 }
 
 
+//GET /api/posts/:id
+
+async function getPostById(req, res){
+    try{
+        const post = await PostModel.findPostById(req.params.id);
+
+        if(!post){
+            return res.status(404).json({message:"Post not found"});
+        }
+
+        const user = await UserModel.findUserById(post.userId);
+
+        // The author's account may have been deleted; still return the post.
+        res.status(200).json({
+            ...post,
+            authorName: user ? { first_name: user.first_name, last_name: user.last_name } : null,
+        });
+    }
+    catch(error){
+        console.error("Error fetching post:", error);
+        res.status(500).json({message: "Failed to fetch post"});
+    }
+}
+
+
 module.exports = {
+    createPost,
     getPosts,
-    createPost
+    getPostById
 }

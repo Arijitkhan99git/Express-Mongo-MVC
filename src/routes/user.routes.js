@@ -15,9 +15,9 @@ router.get("/", controller.getUsers);
 // It is commented out because registration is now handled by POST /api/auth/register.
 // router.post("/", validateUser, controller.createUser);
 
-router.get("/:id", validateObjectId, controller.getUserById);
-router.put("/:id", validateObjectId, validateUser, controller.replaceUser);
-router.patch("/:id", validateObjectId, validateUserPartial, controller.updateUser);
-router.delete("/:id", validateObjectId, controller.deleteUser);
+router.get("/:id", validateObjectId("user"), controller.getUserById);
+router.put("/:id", validateObjectId("user"), validateUser, controller.replaceUser);
+router.patch("/:id", validateObjectId("user"), validateUserPartial, controller.updateUser);
+router.delete("/:id", validateObjectId("user"), controller.deleteUser);
 
 module.exports = router;
